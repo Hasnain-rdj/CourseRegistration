@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="./css/student.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h2></h2>
+        <button onclick="logout()">Logout</button>
+
+        <div id="courseSelection">
+            <h3>Available Courses</h3>
+            <input type="text" id="searchCourses" placeholder="Search courses..." oninput="filterCourses()" />
+            <label>Filter by Department:</label>
+            <select id="filterDepartment" onchange="filterCourses()">
+                <option value="">All</option>
+                <option value="CS">Computer Science</option>
+                <option value="EE">Electrical Engineering</option>
+                <option value="ME">Mechanical Engineering</option>
+            </select>
+            <label>Filter by Level:</label>
+            <select id="filterLevel" onchange="filterCourses()">
+                <option value="">All</option>
+                <option value="1">Level 1</option>
+                <option value="2">Level 2</option>
+                <option value="3">Level 3</option>
+            </select>
+            <ul id="courseList"></ul>
+        </div>
+
+
+        <div id="schedule">
+            <h3>Your Weekly Schedule</h3>
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = async function () {
+            const rollNumber = localStorage.getItem("studentRollNumber");
+            if (!rollNumber) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/students/profile/${rollNumber}`);
+                if (res.ok) {
+                    const student = await res.json();
+                    document.querySelector("h2").textContent = `Welcome ${student.name}`;
+                    document.querySelector("h2").style.color = "black"
+                } else {
+                    document.querySelector("h2").textContent = "Welcome, Fastian!!";
+                }
+            } catch (err) {
+                console.error("Error fetching student profile:", err);
+                document.querySelector("h2").textContent = "Welcome, Student";
+            }
+            fetchStudentSchedule(rollNumber);
+            fetchCourses();
+        };
+
+        function logout() {
+            console.log("Logging out...");
+            localStorage.removeItem("studentRollNumber");
+            window.location.href = "index.html";
+        }
+
+
+        async function fetchCourses() {
+            try {
+                const res = await fetch("http://localhost:5000/api/courses");
+                if (!res.ok) throw new Error("Courses API not found");
+                const data = await res.json();
+                localStorage.setItem("allCourses", JSON.stringify(data));
+                displayCourses(data);
+            } catch (error) {
+                console.error("Error loading courses!", error);
+            }
+        }
+
+        function displayCourses(courses) {
+            const courseList = document.getElementById("courseList");
+            courseList.innerHTML = "";
+            courses.forEach(course => {
+                const li = document.createElement("li");
+                li.innerHTML = `<b>${course.name}</b> (${course.courseCode}) - ${course.department}, Level ${course.level} 
+                <br>Time: ${course.timeSlot} | Seats: <span id="seats-${course.courseCode}">${course.seatsAvailable}</span>
+                <br>Prerequisites: ${course.prerequisites.length > 0 ? course.prerequisites.join(", ") : "None"}
+                <br>Status: ${course.status}
+                <br><button onclick="registerCourse('${course.courseCode}')">Register</button>`;
+                courseList.appendChild(li);
+            });
+        }
+
+
+        function filterCourses() {
+            let allCourses = JSON.parse(localStorage.getItem("allCourses")) || [];
+            const searchQuery = document.getElementById("searchCourses").value.toLowerCase();
+            const department = document.getElementById("filterDepartment").value;
+            const level = document.getElementById("filterLevel").value;
+            const filteredCourses = allCourses.filter(course =>
+                (searchQuery === "" || course.name.toLowerCase().includes(searchQuery) || course.courseCode.toLowerCase().includes(searchQuery)) &&
+                (department === "" || course.department === department) &&
+                (level === "" || course.level == level)
+            );
+            displayCourses(filteredCourses);
+        }
+
+
+        async function registerCourse(courseCode) {
+            const rollNumber = localStorage.getItem("studentRollNumber");
+            try {
+                const res = await fetch("http://localhost:5000/api/courses/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNumber, courseCode })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert("Course registered successfully!");
+                    fetchStudentSchedule(rollNumber);
+                    updateSeatAvailability(courseCode);
+                } else {
+                    alert("Error registering course: " + data.message);
+                }
+            } catch (error) {
+                console.error("Error registering course!", error);
+            }
+        }
+
+
+        async function fetchStudentSchedule(rollNumber) {
+            try {
+                const res = await fetch(`http://localhost:5000/api/courses/schedule/${rollNumber}`);
+                const schedule = await res.json();
+                localStorage.setItem("studentSchedule", JSON.stringify(schedule));
+                displaySchedule(schedule);
+            } catch (error) {
+                console.error("Error loading schedule!", error);
+            }
+        }
+
+        function displaySchedule(schedule) {
+            const calendar = document.getElementById("calendar");
+            calendar.innerHTML = "";
+            schedule.forEach(course => {
+                const div = document.createElement("div");
+                div.classList.add("schedule-item");
+                div.innerHTML = `<b>${course.name}</b> (${course.courseCode}) - ${course.timeSlot} 
+          <br>Days: ${course.days.join(", ")}
+          <br><button onclick="dropCourse('${course.courseCode}')">Drop</button>`;
+                if (!checkScheduleConflict(course)) {
+                    div.style.backgroundColor = "red";
+                }
+                else {
+                    div.style.backgroundColor = "green";
+                }
+                calendar.appendChild(div);
+            });
+        }
+
+
+        async function dropCourse(courseCode) {
+            const rollNumber = localStorage.getItem("studentRollNumber");
+            try {
+                const res = await fetch("http://localhost:5000/api/courses/drop", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNumber, courseCode })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert("Course dropped successfully!");
+                    fetchStudentSchedule(rollNumber);
+                    updateSeatAvailability(courseCode);
+                } else {
+                    alert("Error dropping course: " + data.message);
+                }
+            } catch (error) {
+                console.error("Error dropping course!", error);
+            }
+        }
+
+
+        function checkScheduleConflict(newCourse) {
+            const schedule = JSON.parse(localStorage.getItem("studentSchedule")) || [];
+            return schedule.some(existingCourse =>
+                existingCourse.days.some(day => newCourse.days.includes(day)) &&
+                existingCourse.timeSlot === newCourse.timeSlot
+            );
+        }
+
+        async function updateSeatAvailability(courseCode) {
+            try {
+                const res = await fetch(`http://localhost:5000/api/courses/${courseCode}`);
+                const course = await res.json();
+                document.getElementById(`seats-${courseCode}`).textContent = course.seatsAvailable;
+            } catch (error) {
+                console.error("Error updating seat availability!", error);
+            }
+        }
+    </script>
+</body>
+
+</html>

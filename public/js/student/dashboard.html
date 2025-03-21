@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="../../css/dash_style.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <h1>Student Dashboard</h1>
+        <h2>Welcome, <span id="studentName"></span></h2>
+
+        <!-- Course Filters -->
+        <h3>Available Courses</h3>
+        <input type="text" id="search" placeholder="Search courses..." onkeyup="filterCourses()">
+
+        <label>
+            Department:
+            <select id="departmentFilter" onchange="filterCourses()">
+                <option value="">All</option>
+            </select>
+        </label>
+
+        <label>
+            Course Level:
+            <select id="levelFilter" onchange="filterCourses()">
+                <option value="">All</option>
+            </select>
+        </label>
+
+        <label>
+            Time of Day:
+            <select id="timeFilter" onchange="filterCourses()">
+                <option value="">All</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="evening">Evening</option>
+            </select>
+        </label>
+
+        <label>
+            Days:
+            <select id="dayFilter" onchange="filterCourses()">
+                <option value="">All</option>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+            </select>
+        </label>
+
+        <label>
+            Open Seats Only:
+            <input type="checkbox" id="openSeatsFilter" onchange="filterCourses()">
+        </label>
+
+        <!-- Courses List -->
+        <ul id="courseList"></ul>
+
+        <!-- Weekly Schedule -->
+        <h3>Your Weekly Schedule</h3>
+        <table id="scheduleTable">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <!-- Course Prerequisites -->
+        <h3>Course Prerequisites</h3>
+        <div id="prerequisites"></div>
+
+        <!-- Logout Button -->
+        <button id="logoutBtn" onclick="logout()">Logout</button>
+    </div>
+
+    <script src="../../js/dashboard.js"></script>
+</body>
+
+</html>

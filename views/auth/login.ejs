@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- ✅ Ensure this file exists -->
+</head>
+
+<body>
+
+    <h2>Student Login</h2>
+
+    <form id="studentLoginForm">
+        <label for="studentRollNumber">Roll Number:</label>
+        <input type="text" id="studentRollNumber" name="rollNumber" required>
+
+        <label for="studentPassword">Password:</label>
+        <input type="password" id="studentPassword" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="errorMessage" style="color: red;"></p> <!-- ✅ Show error messages -->
+
+    <script src="/js/auth.js"></script> <!-- ✅ Ensure this file exists in 'public/js/' -->
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Course System</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+    <h1>Welcome to FAST-NUCES Course Registration System💻</h1>
+    <div class="container">
+        <div id="loginSelection" class="card">
+            <h2>You are a?</h2>
+            <button onclick="showStudentLogin()">Student👨‍🎓</button>
+            <button onclick="showAdminLogin()">Admin👨‍💼</button>
+        </div>
+
+        <div id="studentLogin" class="card" style="display: none;">
+            <h2>Student Login</h2>
+            <input type="text" id="rollNumber" placeholder="Enter Roll Number">
+            <button onclick="login()">Login</button>
+            <button onclick="backToSelection()">Back</button>
+        </div>
+
+        <div id="adminLogin" class="card" style="display: none;">
+            <h2>Admin Login</h2>
+            <input type="text" id="adminUsername" placeholder="Enter Username">
+            <input type="password" id="adminPassword" placeholder="Enter Password">
+            <button onclick="loginAdmin()">Login</button>
+            <button onclick="backToSelection()">Back</button>
+        </div>
+    </div>
+
+    <script>
+        function showStudentLogin() {
+            document.getElementById('loginSelection').style.display = 'none';
+            document.getElementById('studentLogin').style.display = 'block';
+        }
+
+        function showAdminLogin() {
+            document.getElementById('loginSelection').style.display = 'none';
+            document.getElementById('adminLogin').style.display = 'block';
+        }
+
+        function backToSelection() {
+            document.getElementById('studentLogin').style.display = 'none';
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('loginSelection').style.display = 'block';
+        }
+    </script>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
