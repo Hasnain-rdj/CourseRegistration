@@ -37,7 +37,6 @@ exports.adminLogin = async (req, res) => {
             return res.status(401).json({ error: "Invalid Username or Password" });
         }
 
-        // Compare the plain-text password directly
         if (password !== admin.password) {
             return res.status(401).json({ error: "Invalid Username or Password" });
         }
